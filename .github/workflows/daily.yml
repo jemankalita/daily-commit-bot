@@ -1,0 +1,31 @@
+name: Smart Daily Commits
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+jobs:
+  commit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Generate random commits
+        run: |
+          git config user.name "jemankalita"
+          git config user.email "jemankalita1@gmail.com"
+
+          COUNT=$(( (RANDOM % 5) + 1 ))
+
+          echo "Making $COUNT commits..."
+
+          for i in $(seq 1 $COUNT)
+          do
+            echo "Commit $i at $(date)" >> log.txt
+            git add .
+            git commit -m "Auto commit $i on $(date)"
+          done
+
+          git push
