@@ -1,8 +1,8 @@
-name: Smart Daily Commits
+name: Smart Realistic Commits
 
 on:
   schedule:
-    - cron: "0 */6 * * *"
+    - cron: "0 14,18,21 * * *"   # evening/night (more human-like)
   workflow_dispatch:
 
 permissions:
@@ -17,20 +17,48 @@ jobs:
         with:
           persist-credentials: true
 
-      - name: Generate random commits
+      - name: Generate realistic commits
         run: |
           git config user.name "jemankalita"
           git config user.email "jemankalita1@gmail.com"
 
-          COUNT=$(( (RANDOM % 5) + 1 ))
+          # 30% chance to skip the day (realistic inactivity)
+          SKIP=$(( RANDOM % 10 ))
+          if [ "$SKIP" -lt 3 ]; then
+            echo "Skipping today (rest day)"
+            exit 0
+          fi
+
+          # Random number of commits (1–6)
+          COUNT=$(( (RANDOM % 6) + 1 ))
+
+          # Realistic commit messages
+          MESSAGES=(
+            "fix bug"
+            "update logic"
+            "refactor code"
+            "improve performance"
+            "minor changes"
+            "cleanup"
+            "add feature"
+            "optimize code"
+            "update README"
+            "debug issue"
+          )
 
           echo "Making $COUNT commits..."
 
           for i in $(seq 1 $COUNT)
           do
-            echo "Commit $i at $(date)" >> log.txt
+            MSG=${MESSAGES[$RANDOM % ${#MESSAGES[@]}]}
+
+            echo "$MSG at $(date)" >> log.txt
             git add .
-            git commit -m "Auto commit $i on $(date)"
+
+            # Random delay (simulate real coding)
+            sleep $(( (RANDOM % 5) + 1 ))
+
+            git commit -m "$MSG"
           done
 
           git push
